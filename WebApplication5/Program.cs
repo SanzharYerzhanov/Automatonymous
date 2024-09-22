@@ -39,8 +39,7 @@ app.MapGet("/send-order", async (IPublishEndpoint endpoint) =>
 {
     await endpoint.Publish<SubmitOrder>(new
     {
-        CorrelationId = Guid.NewGuid(),
-        OrderDate = DateTime.UtcNow
+        Orderid = Guid.NewGuid()
     });
     
 });

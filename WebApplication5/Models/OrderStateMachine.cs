@@ -4,7 +4,6 @@ namespace WebApplication5.Models;
 
 public class OrderStateMachine : MassTransitStateMachine<OrderState>
 {
-    public Event<SubmitOrder> SubmitOrder { get; set; }
     public State Submitted { get; set; }
     public OrderStateMachine()
     {
@@ -15,6 +14,11 @@ public class OrderStateMachine : MassTransitStateMachine<OrderState>
         });
         Initially(
             When(SubmitOrder)
+                .Then(cxt =>
+                {
+                    cxt.Saga.OrderDate = DateTime.UtcNow;
+                })
                 .TransitionTo(Submitted));
     }
+    public Event<SubmitOrder> SubmitOrder { get; set; }
 }
