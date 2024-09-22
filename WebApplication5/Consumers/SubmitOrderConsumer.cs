@@ -5,8 +5,8 @@ namespace WebApplication5.Consumers;
 
 public class SubmitOrderConsumer : IConsumer<SubmitOrder>
 {
-    public Task Consume(ConsumeContext<SubmitOrder> context)
+    
+    public async Task Consume(ConsumeContext<SubmitOrder> context)
     {
-         
     }
 }

@@ -1,4 +1,5 @@
 using MassTransit;
+using MassTransit.EntityFrameworkCoreIntegration;
 using Microsoft.EntityFrameworkCore;
 using WebApplication5.Consumers;
 using WebApplication5.Models;
@@ -11,9 +12,9 @@ builder.Services.AddMassTransit(x =>
         .EntityFrameworkRepository(conf =>
         {
             conf.ConcurrencyMode = ConcurrencyMode.Optimistic;
-            conf.AddDbContext<DbContext, OrderStateDbContext>((provider, optionsBuilder) =>
+            conf.AddDbContext<SagaDbContext, OrderStateDbContext>((provider, opts) =>
             {
-                optionsBuilder.UseSqlServer(builder.Configuration.GetConnectionString("Automatonymous"));
+                opts.UseSqlServer(builder.Configuration.GetConnectionString("Automatonymous"));
             });
         });
     x.UsingRabbitMq((context, cfg) =>
@@ -25,13 +26,23 @@ builder.Services.AddMassTransit(x =>
         });
         cfg.ReceiveEndpoint("order-queue", conf =>
         {
-            
+            conf.ConfigureSaga<OrderState>(context);
             conf.ConfigureConsumer<SubmitOrderConsumer>(context);
         });
+        cfg.ConfigureEndpoints(context);
     });
 });
 var app = builder.Build();
 
 app.MapGet("/", () => "Hello World!");
+app.MapGet("/send-order", async (IPublishEndpoint endpoint) =>
+{
+    await endpoint.Publish<SubmitOrder>(new
+    {
+        CorrelationId = Guid.NewGuid(),
+        OrderDate = DateTime.UtcNow
+    });
+    
+});
 
 app.Run();
