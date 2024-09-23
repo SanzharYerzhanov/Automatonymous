@@ -1,13 +1,13 @@
 using MassTransit;
 using MassTransit.EntityFrameworkCoreIntegration;
 using Microsoft.EntityFrameworkCore;
-using WebApplication5.Consumers;
-using WebApplication5.Models;
+ using WebApplication5.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddMassTransit(x =>
 {
     x.AddConsumer<SubmitOrderConsumer>();
+    x.AddConsumer<ProcessOrderConsumer>();
     x.AddSagaStateMachine<OrderStateMachine, OrderState>()
         .EntityFrameworkRepository(conf =>
         {

@@ -17,7 +17,8 @@ namespace WebApplication5.Migrations
                 {
                     CorrelationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CurrentState = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
-                    OrderDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    ProcessOrderRequestId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ProcessingId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {

@@ -12,8 +12,8 @@ using WebApplication5.Models;
 namespace WebApplication5.Migrations
 {
     [DbContext(typeof(OrderStateDbContext))]
-    [Migration("20240922073631_FirstMigration")]
-    partial class FirstMigration
+    [Migration("20240922180925_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,8 +35,11 @@ namespace WebApplication5.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("nvarchar(64)");
 
-                    b.Property<DateTime?>("OrderDate")
-                        .HasColumnType("datetime2");
+                    b.Property<Guid?>("ProcessOrderRequestId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ProcessingId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("CorrelationId");
 

@@ -1,7 +1,7 @@
 using MassTransit;
 using WebApplication5.Models;
 
-namespace WebApplication5.Consumers;
+namespace WebApplication5.Models;
 
 public class SubmitOrderConsumer : IConsumer<SubmitOrder>
 {

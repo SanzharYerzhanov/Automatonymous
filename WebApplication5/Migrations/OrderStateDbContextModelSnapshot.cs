@@ -32,8 +32,11 @@ namespace WebApplication5.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("nvarchar(64)");
 
-                    b.Property<DateTime?>("OrderDate")
-                        .HasColumnType("datetime2");
+                    b.Property<Guid?>("ProcessOrderRequestId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ProcessingId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("CorrelationId");
 
