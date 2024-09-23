@@ -4,11 +4,11 @@ namespace WebApplication5.Models
 {
     public class OrderStateMachine : MassTransitStateMachine<OrderState>
     {
-        public Request<OrderState, ProcessOrder, OrderProcessed> ProcessOrder { get; private set; }
-        public Event<SubmitOrder> SubmitOrder { get; private set; }
-        public State Submitted { get; private set; }
-        public State Processed { get; private set; }
-
+        public Request<OrderState, ProcessOrder, OrderProcessed> ProcessOrder { get; private set; } = null!;
+        public Event<SubmitOrder> SubmitOrder { get; private set; } = null!;
+        public State Submitted { get; private set; } = null!;
+        public State Processed { get; private set; } = null!;
+ 
         public OrderStateMachine()
         {
             InstanceState(x => x.CurrentState);
@@ -17,11 +17,10 @@ namespace WebApplication5.Models
             Initially(
                 When(SubmitOrder)
                     .Request(ProcessOrder, cxt => cxt.Init<ProcessOrder>(new ProcessOrder
-                    {
-                        OrderId = cxt.Saga.CorrelationId
-                    }))
-                    .TransitionTo(Submitted)
-            );
+                {
+                    OrderId = cxt.Saga.CorrelationId // Ensure CorrelationId is passed
+                }))
+                        .TransitionTo(Submitted));
             During(Submitted,
                 When(ProcessOrder.Completed)
                     .Then(cxt =>

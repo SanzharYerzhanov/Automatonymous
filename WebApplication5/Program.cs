@@ -19,6 +19,7 @@ builder.Services.AddMassTransit(x =>
         });
     x.UsingRabbitMq((context, cfg) =>
     {
+        cfg.UseDelayedMessageScheduler();
         cfg.Host("rabbitmq://localhost", conf =>
         {
             conf.Username(builder.Configuration["UserSettings:UserName"]!);
@@ -28,6 +29,7 @@ builder.Services.AddMassTransit(x =>
         {
             conf.ConfigureSaga<OrderState>(context);
             conf.ConfigureConsumer<SubmitOrderConsumer>(context);
+            conf.ConfigureConsumer<ProcessOrderConsumer>(context);
         });
         cfg.ConfigureEndpoints(context);
     });
@@ -37,9 +39,9 @@ var app = builder.Build();
 app.MapGet("/", () => "Hello World!");
 app.MapGet("/send-order", async (IPublishEndpoint endpoint) =>
 {
-    await endpoint.Publish<SubmitOrder>(new
+    await endpoint.Publish(new SubmitOrder()
     {
-        Orderid = Guid.NewGuid()
+        OrderId = Guid.NewGuid()
     });
     
 });
