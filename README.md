@@ -1,7 +1,9 @@
 # Automatonymous
-just exploring how sagas work in masstransit. To be honest, spend 2 motherfucking days, in attempt to solve the problem almost become bald, lol. The idea is simple, the Request is sent when SubmitOrder event is consumed. 
+just exploring how sagas work in masstransit. To be honest, spend 2 motherfucking days, in attempt to solve the problem with request, almost become bald, lol. The idea is simple, the Request is sent when SubmitOrder event is consumed. 
 
-1) ```csharp
+# 1)  Requests
+
+```csharp
    .Request(ProcessOrder, cxt => cxt.Init<ProcessOrder>(new ProcessOrder
    {
    OrderId = cxt.Saga.CorrelationId // Ensure CorrelationId is passed
@@ -35,6 +37,51 @@ After the response was received, the following states are available to track its
 * TimeoutExpired: The timeout event
 
 
-Now, i need to learn about schedules in Saga State Machine.
-For the case, if you wonder, the [documentation](https://masstransit.io/documentation/patterns/saga/state-machine#schedule) is what causes complications when it comes to learning, so need to learn on my own.
+# 2) Schedules
+
+Schedules require slightly different configuration. In the OrderStateMachine model below the OrderCompletionTimeoutExpired parameter stands for event that gets raised when the specified delays expires.
+
+```csharp
+public Schedule<OrderState, OrderCompletionTimeoutExpired> OrderCompletionTimeout { get; } = null!;
+public OrderStateMachine()
+{
+    Schedule(() => OrderCompletionTimeout, instance => instance.OrderCompletionTimeoutTokenId,s =>
+        {
+            s.Delay = TimeSpan.FromMinutes(2);
+            s.Received = r => r.CorrelateById(cxt =>
+                cxt.Message.OrderId);
+        });
+}
+```
+> [!NOTE]  
+> **Received** event in the configuration method is needed in order to handle the case when the timeout is passed
+
+OrderCompletionTimeoutTokenId serves as an id to find and unschedule the event is necessary. Whenever Unschedule() method is called the column with the specified OrderCompletionTimeoutTokenId is removed.
+In our case event scheduling is applied when the **SubmitOrder** event is consumed. If we are currently at Submitted state and the event OrderCompleted is consumed, 
+the OrderCompletionTimeout event is unscheduled and the columns relevant for scheduling is removed.
+
+In Program.cs, the following method is required in order to use delayed exchanges, it depends on RabbitMQ having the x-delayed-message exchange type, which comes from delayed messsage plugin.
+```csharp
+cfg.UseDelayedMessageScheduler();
+```
+By default, RabbitMQ image from docker does not natively support the _rabbitmq_delayed_message_exchange_ plugin, so we need to install it explicitly
+
+1) Dockerfile in the project pulls the image from docker and customizes it by downloading the plugin 
+
+```dockerfile
+RUN curl -L https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/download/v3.8.0/rabbitmq_delayed_message_exchange-3.8.0.ez \
+  -o $RABBITMQ_HOME/plugins/rabbitmq_delayed_message_exchange-3.8.0.ez
+```
+2) Now you can run the image without any problem
+```bash
+docker build -t myrabbitmq:delayed .
+```
+
+```bash
+docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 -e RABBITMQ_DEFAULT_USER=your_name -e RABBITMQ_DEFAULT_PASS=your_password myrabbitmq:delayed
+```
+
+
+
+
 
