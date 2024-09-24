@@ -5,13 +5,10 @@ using MassTransit.EntityFrameworkCoreIntegration;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddHangfire(x =>
-{
-    x.UseSqlServerStorage(builder.Configuration.GetConnectionString("Hangfire"));
-});
-builder.Services.AddHangfireServer();
 builder.Services.AddMassTransit(x =>
 {
+    x.AddConsumer<SubmitOrderConsumer>();
+    x.AddConsumer<OrderCompletedConsumer>();
     x.AddSagaStateMachine<OrderStateMachine, OrderState>()
         .EntityFrameworkRepository(e =>
         {
@@ -28,10 +25,21 @@ builder.Services.AddMassTransit(x =>
             h.Username(builder.Configuration["UserSettings:UserName"]!);
             h.Password(builder.Configuration["UserSettings:Password"]!);
         });
+        cfg.ReceiveEndpoint("order-queue", conf =>
+        {
+            conf.ConfigureConsumer<SubmitOrderConsumer>(context);
+            conf.ConfigureSaga<OrderState>(context);
+        });
+        cfg.UseDelayedMessageScheduler();
         cfg.ConfigureEndpoints(context);
     });
 });
 var app = builder.Build();
-app.UseHangfireDashboard(); //accessible via /hangfire endpoint
 app.MapGet("/", () => "Hello World!");
+app.MapGet("/send-order", async (IPublishEndpoint endpoint) =>
+{
+    var id = Guid.NewGuid();
+    Console.WriteLine($"The id {id} is generated");
+    await endpoint.Publish(new SubmitOrder() { OrderId = id });
+});
 app.Run();

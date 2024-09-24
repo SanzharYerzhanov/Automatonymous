@@ -16,11 +16,10 @@ namespace WebApplication5.Models
             Request(() => ProcessOrder, x => x.ProcessOrderRequestId);
             Initially(
                 When(SubmitOrder)
-                    .Request(ProcessOrder, cxt => cxt.Init<ProcessOrder>(new ProcessOrder
+                    .Request(ProcessOrder, cxt => new ProcessOrder
                 {
                     OrderId = cxt.Saga.CorrelationId // Ensure CorrelationId is passed
-                }))
-                        .TransitionTo(Submitted));
+                }).TransitionTo(Submitted));
             During(Submitted,
                 When(ProcessOrder.Completed)
                     .Then(cxt =>

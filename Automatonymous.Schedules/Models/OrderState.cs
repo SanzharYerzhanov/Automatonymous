@@ -6,4 +6,5 @@ public class OrderState : SagaStateMachineInstance
 {
     public Guid CorrelationId { get; set; }
     public string CurrentState { get; set; }
+    public Guid? OrderCompletionTimeoutTokenId { get; set; }
 }
