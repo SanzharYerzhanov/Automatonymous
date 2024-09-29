@@ -1,5 +1,5 @@
 # Automatonymous
-just exploring how sagas work in masstransit. To be honest, spend 2 motherfucking days, in attempt to solve the problem with request, almost become bald, lol. The idea is simple, the Request is sent when SubmitOrder event is consumed. 
+Saga State Machine is a powerful tool to keep tracking the current state of messages.
 
 # 1)  Requests
 
@@ -80,6 +80,9 @@ docker build -t myrabbitmq:delayed .
 ```bash
 docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 -e RABBITMQ_DEFAULT_USER=your_name -e RABBITMQ_DEFAULT_PASS=your_password myrabbitmq:delayed
 ```
+
+## Links
+Link to official documentation: https://masstransit.io/documentation/patterns/saga/state-machine
 
 
 
