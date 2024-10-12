@@ -82,7 +82,7 @@ docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 -e RABBITMQ_DEFAULT_US
 ```
 
 ## Links
-Link to official documentation: https://masstransit.io/documentation/patterns/saga/state-machine
+Link to the official documentation: https://masstransit.io/documentation/patterns/saga/state-machine
 
 
 
